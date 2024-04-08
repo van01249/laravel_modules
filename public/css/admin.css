@@ -1,0 +1,17 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+    /* Đặt chiều rộng cho bảng */
+}
+
+table,
+th,
+td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+
+.card-body {
+    overflow-x: auto;
+}

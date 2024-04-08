@@ -1,0 +1,13 @@
+{
+    "name": "StudentBook",
+    "alias": "studentbook",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\StudentBook\\Providers\\StudentBookServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
