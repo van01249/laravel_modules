@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     {
         view()->composer('*', function ($view) {
             if (Auth::check()) {
-                $user = Auth::user();
+                $admin = Auth::user();
                 if (Auth::user()->admin == 1) {
                     $sidebars = Role::all();
                     foreach ($sidebars as $key => $item) {
@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
                 }
 
 
-                $view->with('sidebars', $sidebars)->with('user', $user);
+                $view->with('sidebars', $sidebars)->with('admin', $admin);
             }
         });
     }

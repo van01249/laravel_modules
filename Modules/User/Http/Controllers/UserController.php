@@ -141,7 +141,6 @@ class UserController extends Controller
         if (Auth::user()->admin == 1 || $checkRole && $checkRole->pivot->edit == 1) {
             $title = 'Chỉnh sửa thông tin người dùng';
             $user = $this->users->find($id);
-
             $roles = $this->roles::all();
             foreach ($roles as $key => $role) {
                 $roles[$key]['add'] = $user->checkRole($role->id) ? $user->checkRole($role->id)->pivot->add : 0;
