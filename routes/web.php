@@ -17,7 +17,7 @@ Route::get('/', function () {
     return view('admin.dashboard');
 })->middleware('checkLogin');
 
-Route::get('/dashboard', function () {
+Route::get('/admin/dashboard', function () {
     return view('admin.dashboard');
 })->middleware('checkLogin')->name('admin.dashboard');
 

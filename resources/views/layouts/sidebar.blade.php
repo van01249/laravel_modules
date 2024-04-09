@@ -15,7 +15,7 @@
                 <img src="{{ asset('dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block">Van</a>
+                <a href="#" class="d-block">{{ $user->name }}</a>
             </div>
         </div>
 
@@ -42,14 +42,20 @@
                                 </p>
                             </div>
                             <ul class="nav nav-treeview">
-                                @foreach ($sidebar->child as $item)
+                                <li class="nav-item">
+                                    <a href="{{ $sidebar->link }}" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Danh sách</p>
+                                    </a>
+                                </li>
+                                @if ($sidebar->add)
                                     <li class="nav-item">
-                                        <a href="{{ $item->link }}" class="nav-link">
+                                        <a href="{{ $sidebar->link }}/create" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
-                                            <p>{{ $item->name }}</p>
+                                            <p>Thêm mới</p>
                                         </a>
                                     </li>
-                                @endforeach
+                                @endif
                             </ul>
                         </li>
                     @else

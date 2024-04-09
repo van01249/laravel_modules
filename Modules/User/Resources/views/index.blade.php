@@ -39,34 +39,37 @@
                             <th>ID</th>
                             <th>Tên người dùng</th>
                             <th>Email</th>
-                            <th>Admin</th>
                             <th>Ngày tạo</th>
                             <th>Ngày cập nhật</th>
                             <th>Người tạo</th>
+                            <th>Admin</th>
                         </tr>
                         @foreach ($users as $user)
                             <tr>
                                 <td>{{ $user->id }}</td>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
-                                <td>
-                                    <input type="checkbox" name="is_admin" class="is_admin"
-                                        {{ $user->is_admin == 1 ? 'checked' : '' }}
-                                        data-href="{{ route('user.active', ['id' => $user->id]) }}">
-                                </td>
                                 <td>{{ $user->created_at }}</td>
                                 <td>{{ $user->updated_at }}</td>
                                 <td>{{ $user->user->name }}</td>
-                                {{-- <td>
-                                    @if ($roles['edit'])
+                                <td>
+                                    @if ($user->admin != 1)
+                                        <input type="checkbox" name="is_admin" class="is_admin"
+                                            {{ $user->is_admin == 1 ? 'checked' : '' }}
+                                            data-href="{{ route('user.active', ['id' => $user->id]) }}">
+                                    @endif
+
+                                </td>
+                                <td>
+                                    @if ($roles['edit'] == 1)
                                         <a class="btn btn-success"
                                             href="{{ route('user.edit', ['user' => $user->id]) }}">Sửa</a>
                                     @endif
-                                    @if ($roles['delete'])
+                                    @if ($roles['delete'] == 1)
                                         <button class="btn btn-danger btn_delete"
                                             data-href="{{ route('user.destroy', ['user' => $user->id]) }}">Xóa</button>
                                     @endif
-                                </td> --}}
+                                </td>
                             </tr>
                         @endforeach
                     </table>

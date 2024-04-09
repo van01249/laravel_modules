@@ -2,11 +2,11 @@
 
 namespace Modules\User\Database\Seeders;
 
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
-use Modules\User\Entities\Models\User;
 
 class UserSeederTableSeeder extends Seeder
 {
@@ -23,6 +23,15 @@ class UserSeederTableSeeder extends Seeder
         User::insert([
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
+            'password' => Hash::make('123123'),
+            'is_admin' => true,
+            'admin' => true,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+        User::insert([
+            'name' => 'Admin Test',
+            'email' => 'admin1@gmail.com',
             'password' => Hash::make('123123'),
             'is_admin' => true,
             'created_at' => Carbon::now(),

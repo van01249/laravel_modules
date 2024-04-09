@@ -1,6 +1,7 @@
 {
     "User": true,
-    "Role": true,
     "StudentBook": true,
-    "UserRole": true
+    "School": true,
+    "Student": true,
+    "Book": true
 }

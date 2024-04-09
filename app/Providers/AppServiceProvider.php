@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,13 +28,21 @@ class AppServiceProvider extends ServiceProvider
     {
         view()->composer('*', function ($view) {
             if (Auth::check()) {
-                $sidebars = Auth::user()->roles()->where('id_parent', 0)->orderBy('id', 'ASC')->get();
-                foreach ($sidebars as $key => $sidebar) {
-                    $child = Auth::user()->roles()->where('id_parent', $sidebar->id)->where('show', 1)->orderBy('id', 'ASC')->get();
-                    $sidebars[$key]['child'] = $child;
+                $user = Auth::user();
+                if (Auth::user()->admin == 1) {
+                    $sidebars = Role::all();
+                    foreach ($sidebars as $key => $item) {
+                        $sidebars[$key]['add'] = 1;
+                    }
+                } else {
+                    $sidebars = Auth::user()->roles;
+                    foreach ($sidebars as $key => $item) {
+                        $sidebars[$key]['add'] = $item->pivot->add;
+                    }
                 }
-                // dd($sidebars);
-                $view->with('sidebars', $sidebars);
+
+
+                $view->with('sidebars', $sidebars)->with('user', $user);
             }
         });
     }

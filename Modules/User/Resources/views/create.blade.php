@@ -59,8 +59,10 @@
                                         <table class="table">
                                             <thead>
                                                 <tr>
-                                                    <th scope="col">#</th>
-                                                    <th scope="col">Active</th>
+                                                    <th scope="col">Quản lý</th>
+                                                    <th scope="col">Thêm</th>
+                                                    <th scope="col">Sửa</th>
+                                                    <th scope="col">Xóa</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -68,7 +70,15 @@
                                                     <tr class="role_tr">
                                                         <td>{{ $role->name }}</td>
                                                         <td>
-                                                            <input type="checkbox" name="actives[{{ $role->id }}]"
+                                                            <input type="checkbox" name="roles[{{ $role->id }}][add]"
+                                                                class="show">
+                                                        </td>
+                                                        <td>
+                                                            <input type="checkbox" name="roles[{{ $role->id }}][edit]"
+                                                                class="show">
+                                                        </td>
+                                                        <td>
+                                                            <input type="checkbox" name="roles[{{ $role->id }}][delete]"
                                                                 class="show">
                                                         </td>
                                                     </tr>

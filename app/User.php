@@ -2,10 +2,10 @@
 
 namespace App;
 
+use App\Models\Role;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Modules\Role\Entities\Models\Role;
 
 class User extends Authenticatable
 {
@@ -50,7 +50,7 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'user_roles')->withPivot(['user_id', 'role_id']);
+        return $this->belongsToMany(Role::class, 'user_roles')->withPivot(['user_id', 'role_id', 'add', 'edit', 'delete']);
     }
 
     public function checkRole($idRole)

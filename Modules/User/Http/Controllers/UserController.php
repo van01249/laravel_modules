@@ -2,15 +2,17 @@
 
 namespace Modules\User\Http\Controllers;
 
+use App\Models\Role;
+use App\Models\UserRole;
 use App\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Modules\Role\Entities\Models\Role;
 use Modules\User\Http\Requests\UserRequest;
-use Modules\UserRole\Entities\Models\UserRole;
+
+
 
 class UserController extends Controller
 {
@@ -30,8 +32,13 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        if (Auth::user()->checkRole(2)) {
+        if (Auth::user()->admin == 1 || Auth::user()->checkRole(1)) {
             $title = 'Danh sách người dùng';
+            //Kiem tra quyen edit, delete
+            $roles = [
+                'edit' => Auth::user()->admin == 1 || Auth::user()->checkRole(1)->pivot->edit == 1 ? 1 : 0,
+                'delete' => Auth::user()->admin == 1 || Auth::user()->checkRole(1)->pivot->delete == 1 ? 1 : 0,
+            ];
 
             //Dữ liệu tìm kiếm
             $dataRequest = $request->all();
@@ -47,7 +54,7 @@ class UserController extends Controller
             }
 
             $users = $users->paginate(10);
-            return view('user::index', compact('title', 'users', 'dataRequest'));
+            return view('user::index', compact('title', 'users', 'dataRequest', 'roles'));
         }
 
         return redirect()->route('notify');
@@ -59,11 +66,12 @@ class UserController extends Controller
      */
     public function create()
     {
-        if (Auth::user()->checkRole(3)) {
+        $checkRole = Auth::user()->checkRole(1);
+        if (Auth::user()->admin == 1 || $checkRole && $checkRole->pivot->add == 1) {
             $title = 'Danh sách người dùng';
 
             //Danh sach quyen
-            $roles = $this->roles->where('id_parent', '<>', 0)->orderBy('id', 'ASC')->get();
+            $roles = $this->roles::all();
 
             return view('user::create', compact('title', 'roles'));
         }
@@ -78,7 +86,8 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
-        if (Auth::user()->checkRole(3)) {
+        $checkRole = Auth::user()->checkRole(1);
+        if (Auth::user()->admin == 1 || $checkRole && $checkRole->pivot->add == 1) {
             $insert = $this->users->create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -92,21 +101,14 @@ class UserController extends Controller
                 $this->userRoles->where('user_id', $insert->id)->delete();
 
                 //Them phan quyen admin
-                if ($request->actives && $actives = $request->actives) {
-                    foreach ($actives as $key => $active) {
-                        $role = $this->roles->find($key);
-                        //Kiểm tra xem đã thêm id_parent vào bảng user_role chưa
-                        $checkRole = $this->userRoles->where(['user_id' => $insert->id, 'role_id' => $role->id_parent])->first();
-                        if (!$checkRole) {
-                            $this->userRoles->create([
-                                'user_id' => $insert->id,
-                                'role_id' => $role->id_parent,
-                            ]);
-                        }
-
+                if ($request->roles && $roles = $request->roles) {
+                    foreach ($roles as $key => $role) {
                         $this->userRoles->create([
                             'user_id' => $insert->id,
                             'role_id' => $key,
+                            'add' => isset($role['add']) ? 1 : 0,
+                            'edit' => isset($role['edit']) ? 1 : 0,
+                            'delete' => isset($role['delete']) ? 1 : 0,
                         ]);
                     }
                 }
@@ -135,7 +137,21 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        return view('user::edit');
+        $checkRole = Auth::user()->checkRole(1);
+        if (Auth::user()->admin == 1 || $checkRole && $checkRole->pivot->edit == 1) {
+            $title = 'Chỉnh sửa thông tin người dùng';
+            $user = $this->users->find($id);
+
+            $roles = $this->roles::all();
+            foreach ($roles as $key => $role) {
+                $roles[$key]['add'] = $user->checkRole($role->id) ? $user->checkRole($role->id)->pivot->add : 0;
+                $roles[$key]['edit'] = $user->checkRole($role->id) ? $user->checkRole($role->id)->pivot->edit : 0;
+                $roles[$key]['delete'] = $user->checkRole($role->id) ? $user->checkRole($role->id)->pivot->delete : 0;
+            }
+
+            return view('user::edit', compact('title', 'roles', 'user'));
+        }
+        return redirect()->route('notify');
     }
 
     /**
@@ -144,9 +160,49 @@ class UserController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function update(Request $request, $id)
+    public function update(UserRequest $request, $id)
     {
-        //
+        $checkRole = Auth::user()->checkRole(1);
+        if (Auth::user()->admin == 1 || $checkRole && $checkRole->pivot->edit == 1) {
+            $user = $this->users->find($id);
+
+            if ($user) {
+                if ($request->has('change_pass'))
+                    $user->password = Hash::make($request->password);
+
+                if ($request->has('name'))
+                    $user->name = $request->name;
+
+                if ($request->has('email'))
+                    $user->email = $request->email;
+
+                $user->user_id = Auth::id();
+
+                $user->is_admin = $request->is_admin == 'on' ? 1 : 0;
+                if ($request->is_admin) {
+                    //Xoa tat ca cac quyen truoc do (Neu co)
+                    $this->userRoles->where('user_id', $id)->delete();
+
+                    //Them phan quyen admin
+                    if ($request->roles && $roles = $request->roles) {
+                        foreach ($roles as $key => $role) {
+                            $this->userRoles->create([
+                                'user_id' => $id,
+                                'role_id' => $key,
+                                'add' => isset($role['add']) ? 1 : 0,
+                                'edit' => isset($role['edit']) ? 1 : 0,
+                                'delete' => isset($role['delete']) ? 1 : 0,
+                            ]);
+                        }
+                    }
+                }
+
+                $user->save();
+
+                return redirect()->route('user.index');
+            }
+        }
+        return redirect()->route('notify');
     }
 
     /**
@@ -156,25 +212,39 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $checkRole = Auth::user()->checkRole(1);
+        if (Auth::user()->admin == 1 || $checkRole && $checkRole->pivot->delete == 1) {
+            $this->users->where('id', $id)->delete();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Xóa thành công'
+            ]);
+        }
+
+        return response()->json([
+            'result' => false,
+            'message' => 'Bạn không có quyền xóa!'
+        ]);
     }
 
     public function active($id, Request $request)
     {
-        // if (Auth::user()->checkRole(4)) {
-        $user = $this->users->find($id);
-        $user->is_admin = $request->check;
-        $user->save();
+        $checkRole = Auth::user()->checkRole(1);
+        if (Auth::user()->admin == 1 || $checkRole && $checkRole->pivot->edit == 1) {
+            $user = $this->users->find($id);
+            $user->is_admin = $request->check;
+            $user->save();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Cập nhật thành công'
+            ]);
+        }
 
         return response()->json([
-            'result' => true,
-            'message' => 'Cập nhật thành công'
+            'result' => false,
+            'message' => 'Không có quyền cập nhập'
         ]);
-        // }
-
-        // return response()->json([
-        //     'result' => false,
-        //     'message' => 'Không có quyền cập nhập'
-        // ]);
     }
 }

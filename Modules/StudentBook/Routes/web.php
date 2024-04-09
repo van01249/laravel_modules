@@ -11,6 +11,5 @@
 |
 */
 
-Route::prefix('studentbook')->group(function() {
-    Route::get('/', 'StudentBookController@index');
-});
+Route::resource('studentBook', 'StudentBookController')->middleware('checkLogin');
+Route::post('/studentBook/active/{id}', 'StudentBookController@active')->name('studentBook.active')->middleware('checkLogin');
