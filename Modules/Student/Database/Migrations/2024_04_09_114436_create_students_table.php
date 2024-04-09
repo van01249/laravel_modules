@@ -19,7 +19,7 @@ class CreateStudentsTable extends Migration
             $table->string('name');
             $table->date('birthday');
             $table->integer('gender'); //1: Nam, 2: Nữ, 3: Giới tính thứ 3
-            $table->integer('grade_level')->default('');
+            $table->integer('grade_level')->default(0);
             $table->string('address');
             $table->string('parent_guardian_name');
             $table->string('phone');

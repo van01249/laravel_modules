@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\User\Database\Seeders;
+namespace Modules\Student\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +16,6 @@ class UserDatabaseSeeder extends Seeder
     {
         Model::unguard();
 
-        $this->call(UserSeederTableSeeder::class);
+        $this->call(StudentTableSeeder::class);
     }
 }
